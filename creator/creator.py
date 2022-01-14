@@ -27,6 +27,7 @@ class PullJob:
         self.common_list = []
         self.cwd = os.getcwd() + '/docs/*'
         self.html = ''
+        self.home = os.getenv('HOME')
 
     def scrape(self):
         page = requests.get(self.url)
@@ -135,7 +136,7 @@ class PullJob:
         pdf.print_job(
             today, self.title, self.company, self.city,
             f'docs/{self.file}.txt', self.file)
-        pdf.output(f'report/{self.file}.pdf')
+        pdf.output(f'{self.home}/Desktop/{self.file}.pdf')
 
     def delete_files(self):
         all_docs = glob.glob(self.cwd)
