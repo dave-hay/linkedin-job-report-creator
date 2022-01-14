@@ -1,8 +1,8 @@
 from creator import PullJob
 
 # For Test name
-url = input('Enter URL')
-file = input('job')
+url = input('Enter URL: ')
+file = input('Job: ')
 nouns = 10
 verbs = 10
 

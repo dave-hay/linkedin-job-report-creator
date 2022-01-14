@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import glob
 from collections import Counter
 from datetime import date
@@ -25,7 +26,7 @@ class PullJob:
         self.common_nouns = []
         self.common_verbs = []
         self.common_list = []
-        self.cwd = os.getcwd() + '/docs/*'
+        self.cwd = Path(__file__).parent.parent.resolve()
         self.html = ''
         self.home = os.getenv('HOME')
 
@@ -66,7 +67,7 @@ class PullJob:
                 self.body.append(x)
 
     def write_text(self):
-        with open(f"docs/{self.file}.txt", 'w') as fp:
+        with open(f"{self.cwd}/docs/{self.file}.txt", 'w') as fp:
             for x in iter(self.body):
                 self.body_string = self.body_string + x
                 fp.write(x + '\n')
@@ -106,7 +107,7 @@ class PullJob:
         plt.ylabel('Word')
         plt.xlabel('Occurance')
         plt.tight_layout()  # add padding
-        plt.savefig(f'docs/{self.file}.png')
+        plt.savefig(f'{self.cwd}/docs/{self.file}.png')
 
     def verb_pie_chart(self):
         verb_list, verb_occurance = zip(*self.common_verbs)
@@ -115,7 +116,7 @@ class PullJob:
         plt.pie(
             verb_occurance, labels=verb_list, autopct='%1.1f%%', shadow=True,
             startangle=90)
-        plt.savefig(f'docs/verb_{self.file}.png')
+        plt.savefig(f'{self.cwd}/docs/verb_{self.file}.png')
 
     def noun_pie_chart(self):
         noun_list, noun_occurance = zip(*self.common_nouns)
@@ -124,7 +125,7 @@ class PullJob:
         plt.pie(
             noun_occurance, labels=noun_list, autopct='%1.1f%%', shadow=True,
             startangle=90)
-        plt.savefig(f'docs/noun_{self.file}.png')
+        plt.savefig(f'{self.cwd}/docs/noun_{self.file}.png')
 
     def create_PDF(self):
         print('creating report...')
@@ -135,11 +136,11 @@ class PullJob:
         pdf.set_author('David Hay')
         pdf.print_job(
             today, self.title, self.company, self.city,
-            f'docs/{self.file}.txt', self.file)
+            f'docs/{self.file}.txt', self.file, self.cwd)
         pdf.output(f'{self.home}/Desktop/{self.file}.pdf')
 
     def delete_files(self):
-        all_docs = glob.glob(self.cwd)
+        all_docs = glob.glob(f'{self.cwd}/docs/*')
         for f in all_docs:
             os.remove(f)
 

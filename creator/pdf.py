@@ -7,6 +7,7 @@ c = company
 lo = location
 xp = text filepath
 n = file name
+cwdir = files cwd
 """
 
 
@@ -37,19 +38,19 @@ class PDF(FPDF):
         self.cell(0, 6, f'Location: {lo}', 0, 1, 'C')
         self.ln(4)
 
-    def job_body(self, xp, n):
-        with open(xp, "rb") as fp:
+    def job_body(self, xp, n, cwdir):
+        with open(f"{cwdir}/{xp}", "rb") as fp:
             txt = fp.read().decode("latin-1")
         self.set_font('helvetica', size=12)
         self.multi_cell(0, 7, txt)
         self.ln()
-        self.image(f'docs/{n}.png', x=27, w=150)
-        self.image(f'docs/verb_{n}.png', x=27, w=150)
-        self.image(f'docs/noun_{n}.png', x=27, w=150)
+        self.image(f'{cwdir}/docs/{n}.png', x=27, w=150)
+        self.image(f'{cwdir}/docs/verb_{n}.png', x=27, w=150)
+        self.image(f'{cwdir}/docs/noun_{n}.png', x=27, w=150)
 
-    def print_job(self, d, t, c, lo, xp, n):
+    def print_job(self, d, t, c, lo, xp, n, cwdir):
         self.add_page()
         self.job_title(d, t, c, lo)
-        self.job_body(xp, n)
+        self.job_body(xp, n, cwdir)
 
 
