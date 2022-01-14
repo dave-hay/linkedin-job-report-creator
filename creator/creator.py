@@ -3,10 +3,10 @@ import glob
 from collections import Counter
 from datetime import date
 
+import requests
 import spacy
 from bs4 import BeautifulSoup
 import matplotlib.pyplot as plt
-from playwright.sync_api import sync_playwright
 
 from .pdf import PDF
 
@@ -26,66 +26,50 @@ class PullJob:
         self.common_verbs = []
         self.common_list = []
         self.cwd = os.getcwd() + '/docs/*'
+        self.html = ''
 
     def scrape(self):
-        print('downloading html...')
-        with sync_playwright() as p:
-            browser = p.chromium.launch()
-            page = browser.new_page()
-            page.goto(self.url)
-            content = page.content()
-            with open(f'docs/{self.file}.html', 'a') as f:
-                f.write(content)
-                f.close()
-            browser.close()
+        page = requests.get(self.url)
+        if page.status_code == 200:
+            self.html = page.text
+            print('requested')
+        else:
+            print('error loading page')
 
     def get_file(self):
         print('parsing file...')
-        body = []  # List of strings from body of post
-        with open(f"docs/{self.file}.html") as fp:
-            soup = BeautifulSoup(fp, 'html.parser')
-            self.title = soup.find('h1').string.replace("\n", "").strip()
-            self.company = soup.find(
-                'a', class_='topcard__org-name-link '
-                            'topcard__flavor--black-link'
-            ).text.replace("\n", "").strip()
-            self.city = soup.find(
-                'span', class_='topcard__flavor '
-                               'topcard__flavor--bullet'
-            ).string.replace("\n", "").strip()
+        soup = BeautifulSoup(self.html, 'html.parser')
+        self.title = soup.find('h1').string.replace("\n", "").strip()
+        self.company = soup.find('a', class_='topcard__org-name-link '
+                                             'topcard__flavor--black-link'
+                                 ).text.replace("\n", "").strip()
+        self.city = soup.find('span', class_='topcard__flavor '
+                                             'topcard__flavor--bullet'
+                              ).string.replace("\n", "").strip()
         content = soup.find(
             'div', class_='show-more-less-html__markup '
                           'show-more-less-html__markup--clamp-after-5')
         strong_soup = content.find_all('strong')
         li_soup = content.find_all('li')
-        strong_list = []
-        li_list = []
-        for x in strong_soup:
-            strong_list.append(x.text)
-        for x in li_soup:
-            li_list.append(x.text)
+        strong_list = [x.text for x in strong_soup]
+        li_list = [x.text for x in li_soup]
+
         for x in iter(content.stripped_strings):
             if x in strong_list:
-                body.append(' ')
-                body.append(x)
+                self.body.append(' ')
+                self.body.append(x)
             elif x in li_list:
-                body.append(' - ' + x)
+                self.body.append(' - ' + x)
             else:
-                body.append(' ')
-                body.append(x)
-        fp.close()
-        self.body = body
-        self.write_text()
+                self.body.append(' ')
+                self.body.append(x)
 
     def write_text(self):
-        body_string = ''
         with open(f"docs/{self.file}.txt", 'w') as fp:
             for x in iter(self.body):
-                body_string = body_string + x
+                self.body_string = self.body_string + x
                 fp.write(x + '\n')
             fp.close()
-        self.body_string = body_string
-        self.frequency()
 
     def frequency(self):
         nlp = spacy.load('en_core_web_sm')
