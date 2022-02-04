@@ -31,7 +31,11 @@ class PullJob:
         self.home = os.getenv('HOME')
 
     def scrape(self):
-        page = requests.get(self.url)
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                          "AppleWebKit/537.36 (KHTML, like Gecko) "
+                          "Chrome/95.0.4638.54 Safari/537.36"}
+        page = requests.get(self.url, headers=headers)
         if page.status_code == 200:
             self.html = page.text
             print('requested')
@@ -42,15 +46,14 @@ class PullJob:
         print('parsing file...')
         soup = BeautifulSoup(self.html, 'html.parser')
         self.title = soup.find('h1').string.replace("\n", "").strip()
-        self.company = soup.find('a', class_='topcard__org-name-link '
-                                             'topcard__flavor--black-link'
+        self.company = soup.find('a', class_='topcard__org-name-link topcard__flavor--black-link'
                                  ).text.replace("\n", "").strip()
-        self.city = soup.find('span', class_='topcard__flavor '
-                                             'topcard__flavor--bullet'
+        self.city = soup.find('span', class_='topcard__flavor topcard__flavor--bullet'
                               ).string.replace("\n", "").strip()
         content = soup.find(
-            'div', class_='show-more-less-html__markup '
-                          'show-more-less-html__markup--clamp-after-5')
+            'div',
+            class_='show-more-less-html__markup show-more-less-html__markup--clamp-after-5')
+
         strong_soup = content.find_all('strong')
         li_soup = content.find_all('li')
         strong_list = [x.text for x in strong_soup]
