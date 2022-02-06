@@ -34,6 +34,6 @@ Now run `main.py` and when prompted paste the url and then what you would like t
 
 *Note: the program will automatically add `.pdf` after.*
 
-In a couple seconds your report will be done and saved in `/pdf/`!
+In a couple seconds your report will be done and saved in to your desktop!
 
 
